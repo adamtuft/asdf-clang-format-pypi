@@ -15,6 +15,7 @@ main() {
 	if [ "$install_type" != "version" ]; then
 		fail "asdf-clang-format supports release installs only"
 	fi
+    printf "Downloading clang-format version %s to %s\n" "$version" "$download_path"
 	if ! python3 -m pip download clang-format=="$version" --no-deps --only-binary clang-format --dest "$download_path"; then
 		fail "could not download clang-format version $version"
 	fi
