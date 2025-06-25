@@ -8,16 +8,16 @@ plugin_dir=$(dirname "$(dirname "$current_script_path")")
 # shellcheck source=./lib/utils.bash
 source "${plugin_dir}/lib/utils.bash"
 
-mkdir -p "$ASDF_DOWNLOAD_PATH"
+main() {
+	local install_type="$1"
+	local version="$2"
+	local download_path="${3}"
+	if [ "$install_type" != "version" ]; then
+		fail "asdf-clang-format supports release installs only"
+	fi
+	if ! python3 -m pip download clang-format=="$version" --no-deps --only-binary clang-format --dest "$download_path"; then
+		fail "could not download clang-format version $version"
+	fi
+}
 
-# TODO: Adapt this to proper extension and adapt extracting strategy.
-release_file="$ASDF_DOWNLOAD_PATH/$TOOL_NAME-$ASDF_INSTALL_VERSION.tar.gz"
-
-# Download tar.gz file to the download directory
-download_release "$ASDF_INSTALL_VERSION" "$release_file"
-
-#  Extract contents of tar.gz file into the download directory
-tar -xzf "$release_file" -C "$ASDF_DOWNLOAD_PATH" --strip-components=1 || fail "Could not extract $release_file"
-
-# Remove the tar.gz file since we don't need to keep it
-rm "$release_file"
+main "$ASDF_INSTALL_TYPE" "$ASDF_INSTALL_VERSION" "$ASDF_DOWNLOAD_PATH"

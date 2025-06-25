@@ -8,4 +8,35 @@ plugin_dir=$(dirname "$(dirname "$current_script_path")")
 # shellcheck source=./lib/utils.bash
 source "${plugin_dir}/lib/utils.bash"
 
-install_version "$ASDF_INSTALL_TYPE" "$ASDF_INSTALL_VERSION" "$ASDF_INSTALL_PATH"
+main() {
+	local install_type="$1"
+	local version="$2"
+	local install_path="${3%/bin}"
+	local download_path="$4"
+	local wheel
+
+	if [ "$install_type" != "version" ]; then
+		fail "asdf-clang-format supports release installs only"
+	fi
+
+	(
+		wheel="$(find "$download_path" -maxdepth 1 -type f -name "clang_format-${version}*.whl" | head -n 1)"
+		if [ -z "$wheel" ]; then
+			fail "No wheel file found for version $version in $download_path"
+		fi
+		mkdir -p "${install_path}/bin"
+		python3 -m venv "${install_path}/venv"
+		# shellcheck disable=SC1091
+		. "${install_path}/venv/bin/activate"
+		python3 -m pip install --no-index --no-deps "$wheel"
+		local tool="${install_path}/venv/bin/clang-format"
+		local tool_link="${install_path}/bin/clang-format"
+		ln -s "$tool" "$tool_link"
+		[ -x "$tool_link" ] || fail "Expected $tool_link to be executable."
+	) || (
+		rm -rf "$install_path"
+		fail "An error occurred while installing clang-format $version."
+	)
+}
+
+main "$ASDF_INSTALL_TYPE" "$ASDF_INSTALL_VERSION" "$ASDF_INSTALL_PATH" "$ASDF_DOWNLOAD_PATH"
