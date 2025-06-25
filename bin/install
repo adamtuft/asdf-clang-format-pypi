@@ -25,10 +25,14 @@ main() {
 			fail "No wheel file found for version $version in $download_path"
 		fi
 		mkdir -p "${install_path}/bin"
+		printf "Using python version:\n"
+		python3 --version
 		printf "Creating virtual environment at %s\n" "${install_path}/venv"
 		python3 -m venv "${install_path}/venv"
 		# shellcheck disable=SC1091
 		. "${install_path}/venv/bin/activate"
+		printf "Upgrading pip to >= 25.1.0\n"
+		python3 -m pip install 'pip>=25.1.0'
 		printf "Installing clang-format %s to %s\n" "$version" "$install_path"
 		python3 -m pip install --no-index --no-deps "$wheel"
 		local tool="${install_path}/venv/bin/clang-format"
