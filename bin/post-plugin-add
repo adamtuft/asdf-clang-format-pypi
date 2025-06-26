@@ -20,8 +20,8 @@ printf "        %s\n" "${TARGET_TOOL_NAME}"
 printf "\n"
 printf "Checking PyPI for availability of %s...\n" "${TARGET_TOOL_NAME}"
 if ! python3 -m pip index versions "${TARGET_TOOL_NAME}"; then
-    printf "Failed to find %s on PyPI.\n" "${TARGET_TOOL_NAME}"
-    printf "Check that the plugin name chosen matches the PyPI package name\n"
-    printf "and that the package exists on pypi.org.\n"
+    printf "\n*** Failed to find %s on PyPI.\n" "${TARGET_TOOL_NAME}"
+    printf "*** Check that the plugin name chosen matches the PyPI package name\n"
+    printf "*** and that the package exists on pypi.org.\n\n"
     exit 1
 fi
