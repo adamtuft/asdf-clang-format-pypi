@@ -9,7 +9,11 @@ plugin_dir=$(dirname "$(dirname "$current_script_path")")
 . "${plugin_dir}/lib/utils.bash"
 detect_plugin_name
 
-printf "Plugin name: %s\n" "${ASDF_PLUGIN_NAME:-unknown}"
-for varname in ${!ASDF*}; do
-    printf "%s=%s\n" "$varname" "${!varname}"
-done
+printf "Plugin installed to:\n"
+printf "        %s\n" "${ASDF_PLUGIN_PATH}"
+printf "Plugin source:\n"
+printf "        %s\n" "${ASDF_PLUGIN_SOURCE_URL}"
+printf "Detected plugin root:\n"
+printf "        %s\n" "${PLUGIN_ROOT}"
+printf "Detected plugin name:\n"
+printf "        %s\n" "${PLUGIN_NAME}"
