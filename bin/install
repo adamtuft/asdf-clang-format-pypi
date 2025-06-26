@@ -7,7 +7,7 @@ plugin_dir=$(dirname "$(dirname "$current_script_path")")
 
 # shellcheck source=./lib/utils.bash
 . "${plugin_dir}/lib/utils.bash"
-detect_plugin_name
+detect_tool_name
 
 list_installed_executables() {
 	python3 -m pip show -f "$1" | sed -nr 's,^.*/bin/(.*)$,\1,p' | tr '\n' ' '
@@ -46,7 +46,7 @@ main() {
 		printf "Upgrading pip to >= 25.1.0\n"
 		python3 -m pip install -q 'pip>=25.1.0'
 
-		printf "Installing %s %s to %s\n" "${PLUGIN_NAME}" "$version" "$install_path"
+		printf "Installing %s %s to %s\n" "${TARGET_TOOL_NAME}" "$version" "$install_path"
 		python3 -m pip install -q --no-index --no-deps "$download_path"/*.whl
 
 		printf "Installed packages:\n"
@@ -55,14 +55,14 @@ main() {
 		done
 
 		printf "Linking installed executables\n"
-		for app in $(list_installed_executables "${PLUGIN_NAME}"); do
+		for app in $(list_installed_executables "${TARGET_TOOL_NAME}"); do
 			link "$install_path" "$app"
 		done
 
-		printf "%s was successfully installed\n" "$PLUGIN_NAME"
+		printf "%s was successfully installed\n" "$TARGET_TOOL_NAME"
 	) || (
 		rm -rf "$install_path"
-		fail "An error occurred while installing ${PLUGIN_NAME} $version."
+		fail "An error occurred while installing ${TARGET_TOOL_NAME} $version."
 	)
 }
 

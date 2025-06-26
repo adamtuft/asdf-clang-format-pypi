@@ -7,7 +7,7 @@ plugin_dir=$(dirname "$(dirname "$current_script_path")")
 
 # shellcheck source=./lib/utils.bash
 . "${plugin_dir}/lib/utils.bash"
-detect_plugin_name
+detect_tool_name
 
 main() {
 	local install_type="$1"
@@ -16,10 +16,10 @@ main() {
 	if [ "$install_type" != "version" ]; then
 		fail "only release installs are supported, got: $install_type"
 	fi
-	printf "Downloading %s version %s to %s\n" "$PLUGIN_NAME" "$version" "$download_path"
-	if ! python3 -m pip download -q "$PLUGIN_NAME"=="$version" --disable-pip-version-check \
-		--only-binary "$PLUGIN_NAME" --dest "$download_path"; then
-		fail "could not download $PLUGIN_NAME version $version"
+	printf "Downloading %s version %s to %s\n" "$TARGET_TOOL_NAME" "$version" "$download_path"
+	if ! python3 -m pip download -q "$TARGET_TOOL_NAME"=="$version" --disable-pip-version-check \
+		--only-binary "$TARGET_TOOL_NAME" --dest "$download_path"; then
+		fail "could not download $TARGET_TOOL_NAME version $version"
 	fi
 	printf "Downloaded:\n"
 	find "${download_path}/" | xargs printf "  %s\n" || true

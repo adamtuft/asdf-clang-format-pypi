@@ -13,20 +13,20 @@ stacktrace() {
 }
 
 fail() {
-	printf "asdf-%s: $* \n" "${PLUGIN_NAME:-unknown}"
+	printf "asdf-%s: $* \n" "${TARGET_TOOL_NAME:-unknown}"
 	stacktrace
 	exit 1
 }
 
-detect_plugin_name() {
-	# Detect the plugin name from the current script path.
+detect_tool_name() {
+	# Detect the tool name from the current script path.
 	local CURRENT_SCRIPT="${BASH_SOURCE[0]}"
 	PLUGIN_ROOT="$(dirname "$(dirname "${CURRENT_SCRIPT}")")"
-	if [ "${PLUGIN_NAME+x}" != x ]; then
-		PLUGIN_NAME="${PLUGIN_ROOT##*/}"
+	if [ "${TARGET_TOOL_NAME+x}" != x ]; then
+		TARGET_TOOL_NAME="${PLUGIN_ROOT##*/}"
 		# When added with `asdf plugin test ...` the plugin name is prefixed with `asdf-test-`
 		# so remove this to detect the tool name correctly.
-		PLUGIN_NAME="${PLUGIN_NAME##asdf-test-}"
+		TARGET_TOOL_NAME="${TARGET_TOOL_NAME##asdf-test-}"
 	fi
 }
 
