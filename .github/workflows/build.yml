@@ -21,14 +21,14 @@ jobs:
           - clang-format
           - flake8
           - pipx
-          - Sphinx
-          - Pelican
+          - sphinx
+          - pelican
           - tox
           - mypy
           - ruff
-          - Pylint
+          - pylint
           - litecli
-          - Flask
+          - flask
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
