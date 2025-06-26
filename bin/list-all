@@ -7,6 +7,7 @@ plugin_dir=$(dirname "$(dirname "$current_script_path")")
 
 # shellcheck source=./lib/utils.bash
 . "${plugin_dir}/lib/utils.bash"
+detect_plugin_name
 
 py_list_versions() {
 	cat <<EOF
@@ -17,4 +18,6 @@ for version in reversed(q['versions']):
 EOF
 }
 
-python3 -m pip index --json versions clang-format | python3 -c "$(py_list_versions)"
+if ! python3 -m pip index --json versions "$PLUGIN_NAME" | python3 -c "$(py_list_versions)"; then
+	fail "Failed to list versions for plugin '$PLUGIN_NAME'."
+fi

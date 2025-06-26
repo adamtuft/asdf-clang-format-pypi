@@ -7,13 +7,23 @@ plugin_dir=$(dirname "$(dirname "$current_script_path")")
 
 # shellcheck source=./lib/utils.bash
 . "${plugin_dir}/lib/utils.bash"
+detect_plugin_name
 
 py_get_latest() {
 	cat <<EOF
 import json, sys
 q = json.loads(sys.stdin.read())
-print(q['latest'])
+if len(sys.argv) > 1 and sys.argv[1] != "":
+    v = sys.argv[1]
+    for version in q['versions']:
+        if version.startswith(v):
+            print(version)
+            break
+else:
+    print(q['latest'])
 EOF
 }
 
-python3 -m pip index --json versions clang-format | python3 -c "$(py_get_latest)"
+if ! python3 -m pip index --json versions "$PLUGIN_NAME" | python3 -c "$(py_get_latest)" "${1:-}"; then
+	fail "Failed to get latest version for plugin '$PLUGIN_NAME'."
+fi

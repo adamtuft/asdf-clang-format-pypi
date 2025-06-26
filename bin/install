@@ -6,44 +6,65 @@ current_script_path=${BASH_SOURCE[0]}
 plugin_dir=$(dirname "$(dirname "$current_script_path")")
 
 # shellcheck source=./lib/utils.bash
-source "${plugin_dir}/lib/utils.bash"
+. "${plugin_dir}/lib/utils.bash"
+detect_plugin_name
+
+list_installed_executables() {
+	python3 -m pip show -f "$1" | sed -nr 's,^.*/bin/(.*)$,\1,p' | tr '\n' ' '
+}
+
+link() {
+	local install_path="$1"
+	local app="$2"
+	local tool="${install_path}/venv/bin/${app}"
+	local tool_link="${install_path}/bin/${app}"
+	printf "linking %s\n" "$app"
+	ln -s "$tool" "$tool_link"
+	[ -x "$tool_link" ] || fail "Expected $tool_link to be executable."
+}
 
 main() {
 	local install_type="$1"
 	local version="$2"
 	local install_path="${3%/bin}"
 	local download_path="$4"
-	local wheel
 
 	if [ "$install_type" != "version" ]; then
-		fail "asdf-clang-format supports release installs only"
+		fail "only release installs are supported, got: $install_type"
 	fi
 
 	(
-		wheel="$(find "$download_path" -maxdepth 1 -type f -name "clang_format-${version}*.whl" | head -n 1)"
-		if [ -z "$wheel" ]; then
-			fail "No wheel file found for version $version in $download_path"
-		fi
 		mkdir -p "${install_path}/bin"
-		printf "Using python version:\n"
-		python3 --version
+		printf "Using python version: %s\n" "$(python3 --version)"
+
 		printf "Creating virtual environment at %s\n" "${install_path}/venv"
 		python3 -m venv "${install_path}/venv"
+
 		# shellcheck disable=SC1091
 		. "${install_path}/venv/bin/activate"
+
 		printf "Upgrading pip to >= 25.1.0\n"
-		python3 -m pip install 'pip>=25.1.0'
-		printf "Installing clang-format %s to %s\n" "$version" "$install_path"
-		python3 -m pip install --no-index --no-deps "$wheel"
-		local tool="${install_path}/venv/bin/clang-format"
-		local tool_link="${install_path}/bin/clang-format"
-		ln -s "$tool" "$tool_link"
-		[ -x "$tool_link" ] || fail "Expected $tool_link to be executable."
+		python3 -m pip install -q 'pip>=25.1.0'
+
+		printf "Installing %s %s to %s\n" "${PLUGIN_NAME}" "$version" "$install_path"
+		python3 -m pip install -q --no-index --no-deps "$download_path"/*.whl
+
+		printf "Installed packages:\n"
+		pip list --format freeze | while read -r package; do
+			printf "  %s\n" "$package"
+		done
+
+		printf "Linking installed executables\n"
+		for app in $(list_installed_executables "${PLUGIN_NAME}"); do
+			link "$install_path" "$app"
+		done
+
+		printf "%s was successfully installed\n" "$PLUGIN_NAME"
 	) || (
 		rm -rf "$install_path"
-		fail "An error occurred while installing clang-format $version."
+		fail "An error occurred while installing ${PLUGIN_NAME} $version."
 	)
 }
 
-coalesce_install_version
+coalesce_install_version "${plugin_dir}/bin/latest-stable"
 main "$ASDF_INSTALL_TYPE" "$ASDF_INSTALL_VERSION" "$ASDF_INSTALL_PATH" "$ASDF_DOWNLOAD_PATH"

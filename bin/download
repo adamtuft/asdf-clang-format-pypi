@@ -6,21 +6,24 @@ current_script_path=${BASH_SOURCE[0]}
 plugin_dir=$(dirname "$(dirname "$current_script_path")")
 
 # shellcheck source=./lib/utils.bash
-source "${plugin_dir}/lib/utils.bash"
+. "${plugin_dir}/lib/utils.bash"
+detect_plugin_name
 
 main() {
 	local install_type="$1"
 	local version="$2"
 	local download_path="${3}"
 	if [ "$install_type" != "version" ]; then
-		fail "asdf-clang-format supports release installs only"
+		fail "only release installs are supported, got: $install_type"
 	fi
-	printf "Downloading clang-format version %s to %s\n" "$version" "$download_path"
-	if ! python3 -m pip download clang-format=="$version" --disable-pip-version-check --no-deps \
-		--only-binary clang-format --dest "$download_path"; then
-		fail "could not download clang-format version $version"
+	printf "Downloading %s version %s to %s\n" "$PLUGIN_NAME" "$version" "$download_path"
+	if ! python3 -m pip download -q "$PLUGIN_NAME"=="$version" --disable-pip-version-check \
+		--only-binary "$PLUGIN_NAME" --dest "$download_path"; then
+		fail "could not download $PLUGIN_NAME version $version"
 	fi
+	printf "Downloaded:\n"
+	find "${download_path}/" | xargs printf "  %s\n" || true
 }
 
-coalesce_install_version
+coalesce_install_version "${plugin_dir}/bin/latest-stable"
 main "$ASDF_INSTALL_TYPE" "$ASDF_INSTALL_VERSION" "$ASDF_DOWNLOAD_PATH"
