@@ -31,7 +31,7 @@ jobs:
           - flask
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: asdf-vm/actions/install@v4
       - name: Set up python virtual environment
         run: |
